@@ -4,7 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require('mongoose');
-
+const encrypt = require('mongoose-encryption');
 
 const app = express();
 
@@ -21,11 +21,14 @@ mongoose.set('strictQuery', true);
 // if database is present, it'll connect to it otherwise first it'll create and then connect
 mongoose.connect('mongodb://127.0.0.1:27017/userDB' , {useNewUrlParser: true });
 
-const userSchema = {
+const userSchema = new mongoose.Schema({
     email: String,
     password: String
-}
+})
 
+
+const secret = "ThisStringMustBeDeclaredAndPassedForTheEncryption";
+userSchema.plugin(encrypt , {secret: secret , encryptedFields: ["password"]});
 const User = new mongoose.model("User" , userSchema);
 
 app.get("/" , function(req , res){
@@ -39,6 +42,10 @@ app.get("/login" , function(req , res){
 app.get("/register" , function(req , res){
     res.render("register");
 })
+
+app.get("/logout" , function(req , res){
+    res.render('home');
+});
 
 app.post("/register" , function(req , res){
 
